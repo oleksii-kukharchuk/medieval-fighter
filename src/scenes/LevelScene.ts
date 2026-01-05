@@ -15,6 +15,7 @@ export class LevelScene extends Scene {
   private hud!: HUD;
   private paused = false;
   private killedEnemies = 0;
+  private boosterUsed = false;
 
   constructor(private sceneManager: SceneManager, levelId: number) {
     super();
@@ -38,6 +39,9 @@ export class LevelScene extends Scene {
     this.hud = new HUD(this.level.enemies.length, {
       onPauseToggle: (paused) => {
         this.paused = paused;
+      },
+      onBoosterUse: () => {
+        this.useBooster();
       },
     });
 
@@ -73,6 +77,14 @@ export class LevelScene extends Scene {
     bg.endFill();
 
     this.addChild(bg);
+  }
+
+  private useBooster(): void {
+    if (this.boosterUsed) return;
+
+    this.boosterUsed = true;
+    this.timeLeft += 10;
+    this.hud.updateTime(this.timeLeft);
   }
 
   private createEnemies(): void {
