@@ -12,7 +12,6 @@ export class LevelScene extends Scene {
   private level!: LevelConfig;
   private enemies: Enemy[] = [];
   private timeLeft!: number;
-  //private timerText!: PIXI.Text;
   private hud!: HUD;
   private paused = false;
   private killedEnemies = 0;
@@ -35,7 +34,6 @@ export class LevelScene extends Scene {
   enter(): void {
     this.createBackground();
     this.createEnemies();
-    //this.createTimer();
 
     this.hud = new HUD(this.level.enemies.length, {
       onPauseToggle: (paused) => {
@@ -51,6 +49,8 @@ export class LevelScene extends Scene {
 
     this.timeLeft -= dt;
     this.hud.updateTime(this.timeLeft);
+
+    this.enemies.forEach((enemy) => enemy.updateEnemy(dt));
 
     if (this.timeLeft <= 0) {
       this.lose();
@@ -91,19 +91,6 @@ export class LevelScene extends Scene {
       this.addChild(enemy);
     });
   }
-
-  // private createTimer(): void {
-  //   this.timerText = new PIXI.Text({
-  //     text: `Time: ${this.timeLeft}`,
-  //     style: {
-  //       fill: 0xffffff,
-  //       fontSize: 24,
-  //     },
-  //   });
-
-  //   this.timerText.position.set(20, 20);
-  //   this.addChild(this.timerText);
-  // }
 
   private win(): void {
     this.sceneManager.change(

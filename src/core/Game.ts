@@ -1,6 +1,7 @@
-import * as PIXI from 'pixi.js';
-import { SceneManager } from './SceneManager';
-import { MainMenuScene } from '../scenes/MainMenuScene';
+import * as PIXI from "pixi.js";
+import { SceneManager } from "./SceneManager";
+import { MainMenuScene } from "../scenes/MainMenuScene";
+import { loadAssets } from "./Assets";
 
 export class Game {
   public readonly app: PIXI.Application;
@@ -11,16 +12,13 @@ export class Game {
   }
 
   async start(): Promise<void> {
-    await this.app.init({
-      width: 800,
-      height: 600,
-      backgroundColor: 0x1e1e1e,
-    });
+    await this.app.init({ width: 800, height: 600 });
 
     document.body.appendChild(this.app.canvas);
 
-    this.sceneManager = new SceneManager(this.app);
+    await loadAssets(); // ⬅️ ВАЖЛИВО
 
+    this.sceneManager = new SceneManager(this.app);
     this.app.ticker.add(this.update);
 
     this.sceneManager.change(new MainMenuScene(this.sceneManager));
