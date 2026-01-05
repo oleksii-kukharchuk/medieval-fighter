@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Scene } from './Scene';
 import { SceneManager } from '../core/SceneManager';
+import { LevelScene } from './LevelScene';
 
 export class MainMenuScene extends Scene {
   constructor(private sceneManager: SceneManager) {
@@ -32,10 +33,11 @@ export class MainMenuScene extends Scene {
     startButton.eventMode = 'static';
     startButton.cursor = 'pointer';
 
-    startButton.on('pointerdown', () => {
-      console.log('START GAME');
-      // далі буде LevelScene
-    });
+startButton.on('pointerdown', () => {
+  this.sceneManager.change(
+    new LevelScene(this.sceneManager, 1)
+  );
+});
 
     this.addChild(title, startButton);
   }
