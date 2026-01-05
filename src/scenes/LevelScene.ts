@@ -1,26 +1,28 @@
-import * as PIXI from 'pixi.js';
-import { Scene } from './Scene';
-import { SceneManager } from '../core/SceneManager';
-import levelsData from '../data/levels.json';
-import { LevelConfig } from '../systems/LevelTypes';
-import { Enemy } from '../entities/Enemy';
-import { VictoryScene } from './VictoryScene';
-import { DefeatScene } from './DefeatScene';
+import * as PIXI from "pixi.js";
+import { Scene } from "./Scene";
+import { SceneManager } from "../core/SceneManager";
+import levelsData from "../data/levels.json";
+import { LevelConfig } from "../systems/LevelTypes";
+import { Enemy } from "../entities/Enemy";
+import { DefeatScene } from "./DefeatScene";
+import { VictoryScene } from "./VictoryScene";
+import { HUD } from "../ui/HUD";
 
 export class LevelScene extends Scene {
   private level!: LevelConfig;
   private enemies: Enemy[] = [];
   private timeLeft!: number;
-  private timerText!: PIXI.Text;
+  //private timerText!: PIXI.Text;
+  private hud!: HUD;
+  private paused = false;
+  private killedEnemies = 0;
 
-  constructor(
-    private sceneManager: SceneManager,
-    levelId: number
-  ) {
+  constructor(private sceneManager: SceneManager, levelId: number) {
     super();
 
-    const level = (levelsData.levels as LevelConfig[])
-      .find(l => l.id === levelId);
+    const level = (levelsData.levels as LevelConfig[]).find(
+      (l) => l.id === levelId
+    );
 
     if (!level) {
       throw new Error(`Level ${levelId} not found`);
@@ -33,16 +35,26 @@ export class LevelScene extends Scene {
   enter(): void {
     this.createBackground();
     this.createEnemies();
-    this.createTimer();
+    //this.createTimer();
+
+    this.hud = new HUD(this.level.enemies.length, {
+      onPauseToggle: (paused) => {
+        this.paused = paused;
+      },
+    });
+
+    this.addChild(this.hud);
   }
 
   update(dt: number): void {
-    this.timeLeft -= dt;
+    if (this.paused) return;
 
-    this.timerText.text = `Time: ${Math.ceil(this.timeLeft)}`;
+    this.timeLeft -= dt;
+    this.hud.updateTime(this.timeLeft);
 
     if (this.timeLeft <= 0) {
       this.lose();
+      return;
     }
 
     if (this.enemies.length === 0) {
@@ -64,12 +76,15 @@ export class LevelScene extends Scene {
   }
 
   private createEnemies(): void {
-    this.level.enemies.forEach(config => {
+    this.level.enemies.forEach((config) => {
       const enemy = new Enemy(config.x, config.y);
 
-      enemy.on('pointerdown', () => {
+      enemy.on("pointerdown", () => {
         enemy.kill();
-        this.enemies = this.enemies.filter(e => e !== enemy);
+        this.enemies = this.enemies.filter((e) => e !== enemy);
+
+        this.killedEnemies++;
+        this.hud.updateEnemies(this.killedEnemies, this.level.enemies.length);
       });
 
       this.enemies.push(enemy);
@@ -77,32 +92,30 @@ export class LevelScene extends Scene {
     });
   }
 
-  private createTimer(): void {
-    this.timerText = new PIXI.Text({
-      text: `Time: ${this.timeLeft}`,
-      style: {
-        fill: 0xffffff,
-        fontSize: 24,
-      },
-    });
+  // private createTimer(): void {
+  //   this.timerText = new PIXI.Text({
+  //     text: `Time: ${this.timeLeft}`,
+  //     style: {
+  //       fill: 0xffffff,
+  //       fontSize: 24,
+  //     },
+  //   });
 
-    this.timerText.position.set(20, 20);
-    this.addChild(this.timerText);
+  //   this.timerText.position.set(20, 20);
+  //   this.addChild(this.timerText);
+  // }
+
+  private win(): void {
+    this.sceneManager.change(
+      new VictoryScene(this.sceneManager, {
+        levelId: this.level.id,
+        timeSpent: this.level.time - this.timeLeft,
+        maxTime: this.level.time,
+      })
+    );
   }
 
-private win(): void {
-  this.sceneManager.change(
-    new VictoryScene(this.sceneManager, {
-      levelId: this.level.id,
-      timeSpent: this.level.time - this.timeLeft,
-      maxTime: this.level.time,
-    })
-  );
-}
-
-private lose(): void {
-  this.sceneManager.change(
-    new DefeatScene(this.sceneManager, this.level.id)
-  );
-}
+  private lose(): void {
+    this.sceneManager.change(new DefeatScene(this.sceneManager, this.level.id));
+  }
 }
