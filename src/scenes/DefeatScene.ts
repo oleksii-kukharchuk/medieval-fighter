@@ -17,7 +17,7 @@ export class DefeatScene extends Scene {
     this.soundSystem.stopMusic();
     this.soundSystem.playMusic("defeat");
 
-    this.createBackground();
+    this.addBackground("bg_defeat");
     this.createText();
     this.createButton();
   }
@@ -31,15 +31,6 @@ export class DefeatScene extends Scene {
   onUnmute = () => {
     this.soundSystem.playMusic("defeat");
   };
-
-  private createBackground(): void {
-    const bg = new PIXI.Graphics();
-    bg.beginFill(0x000000, 0.7);
-    bg.drawRect(0, 0, 800, 600);
-    bg.endFill();
-
-    this.addChild(bg);
-  }
 
   private createText(): void {
     const title = new PIXI.Text({

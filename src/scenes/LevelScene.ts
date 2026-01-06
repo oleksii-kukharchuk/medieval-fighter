@@ -8,6 +8,7 @@ import { DefeatScene } from "./DefeatScene";
 import { VictoryScene } from "./VictoryScene";
 import { HUD } from "../ui/HUD";
 import { SoundSystem } from "../systems/SoundSystem";
+import { Assets } from "pixi.js";
 
 export class LevelScene extends Scene {
   private level!: LevelConfig;
@@ -38,10 +39,10 @@ export class LevelScene extends Scene {
   }
 
   enter(): void {
-    //this.soundSystem.stopAll();
     this.soundSystem.playMusic("bg", true);
 
-    this.createBackground();
+    this.addBackground("bg_level");
+
     this.createEnemies();
 
     this.hud = new HUD(this.level.enemies.length, {
@@ -98,15 +99,6 @@ export class LevelScene extends Scene {
   }
 
   // ---------- helpers ----------
-
-  private createBackground(): void {
-    const bg = new PIXI.Graphics();
-    bg.beginFill(0x2c3e50);
-    bg.drawRect(0, 0, 800, 600);
-    bg.endFill();
-
-    this.addChild(bg);
-  }
 
   private useBooster(): void {
     if (this.boosterUsed) return;

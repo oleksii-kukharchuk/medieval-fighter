@@ -24,7 +24,7 @@ export class VictoryScene extends Scene {
     this.soundSystem.stopMusic();
     this.soundSystem.playMusic("victory");
 
-    this.createBackground();
+    this.addBackground("bg_victory");
     this.createText();
     this.createButtons();
     this.createStars();
@@ -42,15 +42,6 @@ export class VictoryScene extends Scene {
 
   // ---------- UI ----------
 
-  private createBackground(): void {
-    const bg = new PIXI.Graphics();
-    bg.beginFill(0x000000, 0.7);
-    bg.drawRect(0, 0, 800, 600);
-    bg.endFill();
-
-    this.addChild(bg);
-  }
-
   private createText(): void {
     const title = new PIXI.Text({
       text: "VICTORY!",
@@ -65,17 +56,6 @@ export class VictoryScene extends Scene {
     title.position.set(400, 180);
 
     const stars = this.calculateStars();
-
-    // const rating = new PIXI.Text({
-    //   text: `Stars: ${stars}`,
-    //   style: {
-    //     fill: 0xffffff,
-    //     fontSize: 28,
-    //   },
-    // });
-
-    // rating.anchor.set(0.5);
-    // rating.position.set(400, 260);
 
     this.addChild(title);
   }

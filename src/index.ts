@@ -1,20 +1,11 @@
-// import * as PIXI from 'pixi.js';
+import { Game } from "./core/Game";
 
-// const app = new PIXI.Application();
+async function bootstrap() {
+  const game = new Game();
+  await game.start();
 
-// async function bootstrap() {
-//   await app.init({
-//     width: 800,
-//     height: 600,
-//     backgroundColor: 0x1e1e1e,
-//   });
+  const root = document.getElementById("game-root");
+  root?.appendChild(game.app.canvas);
+}
 
-//   document.body.appendChild(app.canvas);
-// }
-
-// bootstrap();
-
-import { Game } from './core/Game';
-
-const game = new Game();
-game.start();
+bootstrap();

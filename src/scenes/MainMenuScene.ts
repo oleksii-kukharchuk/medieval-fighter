@@ -13,8 +13,10 @@ export class MainMenuScene extends Scene {
   }
 
   enter(): void {
+    this.addBackground("bg_menu");
+
     const title = new PIXI.Text({
-      text: "Mini Game",
+      text: "Medieval Fighter",
       style: {
         fill: 0xffffff,
         fontSize: 48,
@@ -39,9 +41,6 @@ export class MainMenuScene extends Scene {
 
     startButton.on("pointerdown", () => {
       console.log("START CLICKED");
-
-      // this.soundSystem.play("bg", true);
-
       console.log("GO TO LEVEL");
 
       this.sceneManager.change(
