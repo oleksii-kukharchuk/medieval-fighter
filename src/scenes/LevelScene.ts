@@ -7,6 +7,7 @@ import { Enemy } from "../entities/Enemy";
 import { DefeatScene } from "./DefeatScene";
 import { VictoryScene } from "./VictoryScene";
 import { HUD } from "../ui/HUD";
+import { SoundSystem } from "../systems/SoundSystem";
 
 export class LevelScene extends Scene {
   private level!: LevelConfig;
@@ -17,7 +18,11 @@ export class LevelScene extends Scene {
   private killedEnemies = 0;
   private boosterUsed = false;
 
-  constructor(private sceneManager: SceneManager, levelId: number) {
+  constructor(
+    private sceneManager: SceneManager,
+    private soundSystem: SoundSystem,
+    levelId: number
+  ) {
     super();
 
     const level = (levelsData.levels as LevelConfig[]).find(
@@ -33,6 +38,9 @@ export class LevelScene extends Scene {
   }
 
   enter(): void {
+    //this.soundSystem.stopAll();
+    this.soundSystem.playMusic("bg", true);
+
     this.createBackground();
     this.createEnemies();
 
@@ -42,6 +50,15 @@ export class LevelScene extends Scene {
       },
       onBoosterUse: () => {
         this.useBooster();
+      },
+      onMuteToggle: () => {
+        const muted = this.soundSystem.toggleMute();
+
+        if (!muted) {
+          this.soundSystem.playMusic("bg", true);
+        }
+
+        return muted;
       },
     });
 
@@ -68,6 +85,10 @@ export class LevelScene extends Scene {
 
   exit(): void {}
 
+  onUnmute = () => {
+    this.soundSystem.playMusic("bg", true);
+  };
+
   // ---------- helpers ----------
 
   private createBackground(): void {
@@ -92,6 +113,7 @@ export class LevelScene extends Scene {
       const enemy = new Enemy(config.x, config.y);
 
       enemy.on("pointerdown", () => {
+        this.soundSystem.playSfx("enemyKill");
         enemy.kill();
         this.enemies = this.enemies.filter((e) => e !== enemy);
 
@@ -105,8 +127,10 @@ export class LevelScene extends Scene {
   }
 
   private win(): void {
+    this.soundSystem.playMusic("victory");
+
     this.sceneManager.change(
-      new VictoryScene(this.sceneManager, {
+      new VictoryScene(this.sceneManager, this.soundSystem, {
         levelId: this.level.id,
         timeSpent: this.level.time - this.timeLeft,
         maxTime: this.level.time,
@@ -115,6 +139,9 @@ export class LevelScene extends Scene {
   }
 
   private lose(): void {
-    this.sceneManager.change(new DefeatScene(this.sceneManager, this.level.id));
+    this.soundSystem.playMusic("defeat");
+    this.sceneManager.change(
+      new DefeatScene(this.sceneManager, this.soundSystem, this.level.id)
+    );
   }
 }

@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 interface HUDCallbacks {
   onPauseToggle: (paused: boolean) => void;
   onBoosterUse: () => void;
+  onMuteToggle: () => boolean;
 }
 
 export class HUD extends PIXI.Container {
@@ -15,6 +16,22 @@ export class HUD extends PIXI.Container {
 
   constructor(totalEnemies: number, private callbacks: HUDCallbacks) {
     super();
+
+    const muteButton = new PIXI.Text({
+      text: "🔊",
+      style: { fontSize: 20 },
+    });
+
+    muteButton.position.set(700, 100);
+    muteButton.eventMode = "static";
+    muteButton.cursor = "pointer";
+
+    muteButton.on("pointerdown", () => {
+      const muted = this.callbacks.onMuteToggle();
+      muteButton.text = muted ? "🔇" : "🔊";
+    });
+
+    this.addChild(muteButton);
 
     this.timeText = new PIXI.Text({
       text: "Time: 0",

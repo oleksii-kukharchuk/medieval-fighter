@@ -1,7 +1,8 @@
-import * as PIXI from 'pixi.js';
-import { Scene } from './Scene';
-import { SceneManager } from '../core/SceneManager';
-import { LevelScene } from './LevelScene';
+import * as PIXI from "pixi.js";
+import { Scene } from "./Scene";
+import { SceneManager } from "../core/SceneManager";
+import { LevelScene } from "./LevelScene";
+import { SoundSystem } from "../systems/SoundSystem";
 
 interface VictoryData {
   levelId: number;
@@ -12,12 +13,16 @@ interface VictoryData {
 export class VictoryScene extends Scene {
   constructor(
     private sceneManager: SceneManager,
+    private soundSystem: SoundSystem,
     private data: VictoryData
   ) {
     super();
   }
 
   enter(): void {
+    this.soundSystem.stopMusic();
+    this.soundSystem.playMusic("victory");
+
     this.createBackground();
     this.createText();
     this.createButtons();
@@ -25,7 +30,13 @@ export class VictoryScene extends Scene {
 
   update(_dt: number): void {}
 
-  exit(): void {}
+  exit(): void {
+    this.soundSystem.stopMusic();
+  }
+
+  onUnmute = () => {
+    this.soundSystem.playMusic("victory");
+  };
 
   // ---------- UI ----------
 
@@ -40,11 +51,11 @@ export class VictoryScene extends Scene {
 
   private createText(): void {
     const title = new PIXI.Text({
-      text: 'VICTORY!',
+      text: "VICTORY!",
       style: {
         fill: 0x00ff00,
         fontSize: 48,
-        fontWeight: 'bold',
+        fontWeight: "bold",
       },
     });
 
@@ -68,18 +79,22 @@ export class VictoryScene extends Scene {
   }
 
   private createButtons(): void {
-    const nextBtn = this.createButton('NEXT LEVEL', 340);
-    const replayBtn = this.createButton('REPLAY', 410);
+    const nextBtn = this.createButton("NEXT LEVEL", 340);
+    const replayBtn = this.createButton("REPLAY", 410);
 
-    nextBtn.on('pointerdown', () => {
+    nextBtn.on("pointerdown", () => {
       this.sceneManager.change(
-        new LevelScene(this.sceneManager, this.data.levelId + 1)
+        new LevelScene(
+          this.sceneManager,
+          this.soundSystem,
+          this.data.levelId + 1
+        )
       );
     });
 
-    replayBtn.on('pointerdown', () => {
+    replayBtn.on("pointerdown", () => {
       this.sceneManager.change(
-        new LevelScene(this.sceneManager, this.data.levelId)
+        new LevelScene(this.sceneManager, this.soundSystem, this.data.levelId)
       );
     });
 
@@ -97,8 +112,8 @@ export class VictoryScene extends Scene {
 
     btn.anchor.set(0.5);
     btn.position.set(400, y);
-    btn.eventMode = 'static';
-    btn.cursor = 'pointer';
+    btn.eventMode = "static";
+    btn.cursor = "pointer";
 
     return btn;
   }
