@@ -8,6 +8,7 @@ interface VictoryData {
   levelId: number;
   timeSpent: number;
   maxTime: number;
+  stars: number;
 }
 
 export class VictoryScene extends Scene {
@@ -26,6 +27,7 @@ export class VictoryScene extends Scene {
     this.createBackground();
     this.createText();
     this.createButtons();
+    this.createStars();
   }
 
   update(_dt: number): void {}
@@ -64,18 +66,18 @@ export class VictoryScene extends Scene {
 
     const stars = this.calculateStars();
 
-    const rating = new PIXI.Text({
-      text: `Stars: ${stars}`,
-      style: {
-        fill: 0xffffff,
-        fontSize: 28,
-      },
-    });
+    // const rating = new PIXI.Text({
+    //   text: `Stars: ${stars}`,
+    //   style: {
+    //     fill: 0xffffff,
+    //     fontSize: 28,
+    //   },
+    // });
 
-    rating.anchor.set(0.5);
-    rating.position.set(400, 260);
+    // rating.anchor.set(0.5);
+    // rating.position.set(400, 260);
 
-    this.addChild(title, rating);
+    this.addChild(title);
   }
 
   private createButtons(): void {
@@ -116,6 +118,23 @@ export class VictoryScene extends Scene {
     btn.cursor = "pointer";
 
     return btn;
+  }
+
+  private createStars(): void {
+    const starsText = "⭐".repeat(this.data.stars);
+
+    const text = new PIXI.Text({
+      text: starsText,
+      style: {
+        fontSize: 36,
+        fill: 0xffd700,
+      },
+    });
+
+    text.anchor.set(0.5);
+    text.position.set(400, 260);
+
+    this.addChild(text);
   }
 
   // ---------- logic ----------

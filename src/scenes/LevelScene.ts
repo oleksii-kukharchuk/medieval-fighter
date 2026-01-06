@@ -89,6 +89,14 @@ export class LevelScene extends Scene {
     this.soundSystem.playMusic("bg", true);
   };
 
+  private calculateStars(timeSpent: number, maxTime: number): number {
+    const third = maxTime / 3;
+
+    if (timeSpent <= third) return 3;
+    if (timeSpent <= third * 2) return 2;
+    return 1;
+  }
+
   // ---------- helpers ----------
 
   private createBackground(): void {
@@ -127,13 +135,15 @@ export class LevelScene extends Scene {
   }
 
   private win(): void {
-    this.soundSystem.playMusic("victory");
+    const timeSpent = this.level.time - this.timeLeft;
+    const stars = this.calculateStars(timeSpent, this.level.time);
 
     this.sceneManager.change(
       new VictoryScene(this.sceneManager, this.soundSystem, {
         levelId: this.level.id,
-        timeSpent: this.level.time - this.timeLeft,
+        timeSpent,
         maxTime: this.level.time,
+        stars,
       })
     );
   }
