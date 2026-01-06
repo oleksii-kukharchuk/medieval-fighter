@@ -1,20 +1,23 @@
-// import * as PIXI from 'pixi.js';
+import { Game } from "./core/Game";
 
-// const app = new PIXI.Application();
+async function loadFonts(): Promise<void> {
+  await document.fonts.load("16px MedievalSharp");
+}
 
-// async function bootstrap() {
-//   await app.init({
-//     width: 800,
-//     height: 600,
-//     backgroundColor: 0x1e1e1e,
-//   });
+async function bootstrap() {
+  await loadFonts();
 
-//   document.body.appendChild(app.canvas);
-// }
+  const game = new Game();
+  await game.start();
 
-// bootstrap();
+  const root = document.getElementById("game-root");
+  if (!root) return;
 
-import { Game } from './core/Game';
+  root?.appendChild(game.app.canvas);
 
-const game = new Game();
-game.start();
+  game.app.ticker.addOnce(() => {
+    root.style.visibility = "visible";
+  });
+}
+
+bootstrap();

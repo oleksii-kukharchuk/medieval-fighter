@@ -1,5 +1,5 @@
-import * as PIXI from 'pixi.js';
-import { Scene } from '../scenes/Scene';
+import * as PIXI from "pixi.js";
+import { Scene } from "../scenes/Scene";
 
 export class SceneManager {
   private currentScene?: Scene;
@@ -20,5 +20,9 @@ export class SceneManager {
 
   update(dt: number): void {
     this.currentScene?.update(dt);
+  }
+
+  getCurrentScene(): Scene | undefined {
+    return this.currentScene;
   }
 }

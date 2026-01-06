@@ -1,43 +1,42 @@
-import * as PIXI from 'pixi.js';
-import { Scene } from './Scene';
-import { SceneManager } from '../core/SceneManager';
-import { LevelScene } from './LevelScene';
+import * as PIXI from "pixi.js";
+import { Scene } from "./Scene";
+import { SceneManager } from "../core/SceneManager";
+import { LevelScene } from "./LevelScene";
+import { SoundSystem } from "../systems/SoundSystem";
+import { DefaultTextStyle } from "../ui/TextStyles";
 
 export class DefeatScene extends Scene {
   constructor(
     private sceneManager: SceneManager,
+    private soundSystem: SoundSystem,
     private levelId: number
   ) {
     super();
   }
 
   enter(): void {
-    this.createBackground();
+    this.soundSystem.stopMusic();
+    this.soundSystem.playMusic("defeat");
+
+    this.addBackground("bg_defeat");
     this.createText();
     this.createButton();
   }
 
   update(_dt: number): void {}
 
-  exit(): void {}
-
-  private createBackground(): void {
-    const bg = new PIXI.Graphics();
-    bg.beginFill(0x000000, 0.7);
-    bg.drawRect(0, 0, 800, 600);
-    bg.endFill();
-
-    this.addChild(bg);
+  exit(): void {
+    this.soundSystem.stopMusic();
   }
+
+  onUnmute = () => {
+    this.soundSystem.playMusic("defeat");
+  };
 
   private createText(): void {
     const title = new PIXI.Text({
-      text: 'DEFEAT',
-      style: {
-        fill: 0xff0000,
-        fontSize: 48,
-        fontWeight: 'bold',
-      },
+      text: "DEFEAT",
+      style: DefaultTextStyle,
     });
 
     title.anchor.set(0.5);
@@ -48,21 +47,18 @@ export class DefeatScene extends Scene {
 
   private createButton(): void {
     const retry = new PIXI.Text({
-      text: 'RETRY',
-      style: {
-        fill: 0xffffff,
-        fontSize: 24,
-      },
+      text: "RETRY",
+      style: DefaultTextStyle,
     });
 
     retry.anchor.set(0.5);
     retry.position.set(400, 340);
-    retry.eventMode = 'static';
-    retry.cursor = 'pointer';
+    retry.eventMode = "static";
+    retry.cursor = "pointer";
 
-    retry.on('pointerdown', () => {
+    retry.on("pointerdown", () => {
       this.sceneManager.change(
-        new LevelScene(this.sceneManager, this.levelId)
+        new LevelScene(this.sceneManager, this.soundSystem, this.levelId)
       );
     });
 

@@ -7,6 +7,7 @@ import { Enemy } from "../entities/Enemy";
 import { DefeatScene } from "./DefeatScene";
 import { VictoryScene } from "./VictoryScene";
 import { HUD } from "../ui/HUD";
+import { SoundSystem } from "../systems/SoundSystem";
 
 export class LevelScene extends Scene {
   private level!: LevelConfig;
@@ -17,7 +18,11 @@ export class LevelScene extends Scene {
   private killedEnemies = 0;
   private boosterUsed = false;
 
-  constructor(private sceneManager: SceneManager, levelId: number) {
+  constructor(
+    private sceneManager: SceneManager,
+    private soundSystem: SoundSystem,
+    levelId: number
+  ) {
     super();
 
     const level = (levelsData.levels as LevelConfig[]).find(
@@ -33,7 +38,10 @@ export class LevelScene extends Scene {
   }
 
   enter(): void {
-    this.createBackground();
+    this.soundSystem.playMusic("bg", true);
+
+    this.addBackground("bg_level");
+
     this.createEnemies();
 
     this.hud = new HUD(this.level.enemies.length, {
@@ -42,6 +50,15 @@ export class LevelScene extends Scene {
       },
       onBoosterUse: () => {
         this.useBooster();
+      },
+      onMuteToggle: () => {
+        const muted = this.soundSystem.toggleMute();
+
+        if (!muted) {
+          this.soundSystem.playMusic("bg", true);
+        }
+
+        return muted;
       },
     });
 
@@ -68,16 +85,19 @@ export class LevelScene extends Scene {
 
   exit(): void {}
 
-  // ---------- helpers ----------
+  onUnmute = () => {
+    this.soundSystem.playMusic("bg", true);
+  };
 
-  private createBackground(): void {
-    const bg = new PIXI.Graphics();
-    bg.beginFill(0x2c3e50);
-    bg.drawRect(0, 0, 800, 600);
-    bg.endFill();
+  private calculateStars(timeSpent: number, maxTime: number): number {
+    const third = maxTime / 3;
 
-    this.addChild(bg);
+    if (timeSpent <= third) return 3;
+    if (timeSpent <= third * 2) return 2;
+    return 1;
   }
+
+  // ---------- helpers ----------
 
   private useBooster(): void {
     if (this.boosterUsed) return;
@@ -89,9 +109,16 @@ export class LevelScene extends Scene {
 
   private createEnemies(): void {
     this.level.enemies.forEach((config) => {
-      const enemy = new Enemy(config.x, config.y);
+      const enemy = new Enemy();
 
-      enemy.on("pointerdown", () => {
+      enemy.position.set(config.x, config.y);
+      enemy.scale.set(config.scale ?? 1);
+
+      enemy.hitArea = new PIXI.Circle(0, 0, 32);
+
+      enemy.once("pointerdown", () => {
+        this.soundSystem.playSfx("enemyKill");
+
         enemy.kill();
         this.enemies = this.enemies.filter((e) => e !== enemy);
 
@@ -99,22 +126,32 @@ export class LevelScene extends Scene {
         this.hud.updateEnemies(this.killedEnemies, this.level.enemies.length);
       });
 
-      this.enemies.push(enemy);
       this.addChild(enemy);
+      this.enemies.push(enemy);
     });
+
+    // тимчасово, тільки для деву
+    (window as any).enemies = this.enemies;
   }
 
   private win(): void {
+    const timeSpent = this.level.time - this.timeLeft;
+    const stars = this.calculateStars(timeSpent, this.level.time);
+
     this.sceneManager.change(
-      new VictoryScene(this.sceneManager, {
+      new VictoryScene(this.sceneManager, this.soundSystem, {
         levelId: this.level.id,
-        timeSpent: this.level.time - this.timeLeft,
+        timeSpent,
         maxTime: this.level.time,
+        stars,
       })
     );
   }
 
   private lose(): void {
-    this.sceneManager.change(new DefeatScene(this.sceneManager, this.level.id));
+    this.soundSystem.playMusic("defeat");
+    this.sceneManager.change(
+      new DefeatScene(this.sceneManager, this.soundSystem, this.level.id)
+    );
   }
 }
