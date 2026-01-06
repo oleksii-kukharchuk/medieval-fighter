@@ -3,6 +3,7 @@ import { Scene } from "./Scene";
 import { SceneManager } from "../core/SceneManager";
 import { LevelScene } from "./LevelScene";
 import { SoundSystem } from "../systems/SoundSystem";
+import { DefaultTextStyle, TitleTextStyle } from "../ui/TextStyles";
 
 interface VictoryData {
   levelId: number;
@@ -44,12 +45,8 @@ export class VictoryScene extends Scene {
 
   private createText(): void {
     const title = new PIXI.Text({
-      text: "VICTORY!",
-      style: {
-        fill: 0x00ff00,
-        fontSize: 48,
-        fontWeight: "bold",
-      },
+      text: "VICTORY",
+      style: TitleTextStyle,
     });
 
     title.anchor.set(0.5);
@@ -86,10 +83,7 @@ export class VictoryScene extends Scene {
   private createButton(text: string, y: number): PIXI.Text {
     const btn = new PIXI.Text({
       text,
-      style: {
-        fill: 0xffffff,
-        fontSize: 24,
-      },
+      style: DefaultTextStyle,
     });
 
     btn.anchor.set(0.5);
@@ -105,10 +99,7 @@ export class VictoryScene extends Scene {
 
     const text = new PIXI.Text({
       text: starsText,
-      style: {
-        fontSize: 36,
-        fill: 0xffd700,
-      },
+      style: DefaultTextStyle,
     });
 
     text.anchor.set(0.5);

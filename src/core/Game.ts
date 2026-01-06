@@ -20,9 +20,11 @@ export class Game {
       height: 600,
     });
 
-    document.body.appendChild(this.app.canvas);
+    this.app.renderer.background.alpha = 0;
 
     await loadAssets();
+
+    document.body.appendChild(this.app.canvas);
 
     this.sceneManager = new SceneManager(this.app);
 

@@ -3,6 +3,7 @@ import { Scene } from "./Scene";
 import { SceneManager } from "../core/SceneManager";
 import { LevelScene } from "./LevelScene";
 import { SoundSystem } from "../systems/SoundSystem";
+import { DefaultTextStyle } from "../ui/TextStyles";
 
 export class DefeatScene extends Scene {
   constructor(
@@ -35,11 +36,7 @@ export class DefeatScene extends Scene {
   private createText(): void {
     const title = new PIXI.Text({
       text: "DEFEAT",
-      style: {
-        fill: 0xff0000,
-        fontSize: 48,
-        fontWeight: "bold",
-      },
+      style: DefaultTextStyle,
     });
 
     title.anchor.set(0.5);
@@ -51,10 +48,7 @@ export class DefeatScene extends Scene {
   private createButton(): void {
     const retry = new PIXI.Text({
       text: "RETRY",
-      style: {
-        fill: 0xffffff,
-        fontSize: 24,
-      },
+      style: DefaultTextStyle,
     });
 
     retry.anchor.set(0.5);

@@ -3,6 +3,7 @@ import { Scene } from "./Scene";
 import { SceneManager } from "../core/SceneManager";
 import { LevelScene } from "./LevelScene";
 import { SoundSystem } from "../systems/SoundSystem";
+import { DefaultTextStyle, TitleTextStyle } from "../ui/TextStyles";
 
 export class MainMenuScene extends Scene {
   constructor(
@@ -17,10 +18,7 @@ export class MainMenuScene extends Scene {
 
     const title = new PIXI.Text({
       text: "Medieval Fighter",
-      style: {
-        fill: 0xffffff,
-        fontSize: 48,
-      },
+      style: TitleTextStyle,
     });
 
     title.anchor.set(0.5);
@@ -28,10 +26,7 @@ export class MainMenuScene extends Scene {
 
     const startButton = new PIXI.Text({
       text: "START",
-      style: {
-        fill: 0x00ff00,
-        fontSize: 32,
-      },
+      style: DefaultTextStyle,
     });
 
     startButton.anchor.set(0.5);

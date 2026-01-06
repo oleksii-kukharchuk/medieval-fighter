@@ -2,9 +2,9 @@ import * as PIXI from "pixi.js";
 import { Assets } from "pixi.js";
 
 export class Enemy extends PIXI.AnimatedSprite {
-  private speed = 50;
+  private speed = 20;
 
-  constructor(x: number, y: number) {
+  constructor() {
     const sheet = Assets.get("enemy") as PIXI.Spritesheet;
     const textures = [
       sheet.textures["idle_1.png"],
@@ -15,7 +15,6 @@ export class Enemy extends PIXI.AnimatedSprite {
 
     super(textures);
 
-    this.position.set(x, y);
     this.anchor.set(0.5);
 
     this.animationSpeed = 0.15;
@@ -25,7 +24,6 @@ export class Enemy extends PIXI.AnimatedSprite {
     this.cursor = "pointer";
   }
 
-  /** ВЛАСНИЙ update, не Pixi */
   updateEnemy(dt: number): void {
     this.x += Math.sin(performance.now() / 500) * this.speed * dt;
   }

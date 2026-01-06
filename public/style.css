@@ -19,6 +19,8 @@ body {
 }
 
 #game-root {
+  visibility: hidden;
+
   width: 800px;
   height: 600px;
 

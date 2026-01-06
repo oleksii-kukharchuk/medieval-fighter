@@ -8,7 +8,6 @@ import { DefeatScene } from "./DefeatScene";
 import { VictoryScene } from "./VictoryScene";
 import { HUD } from "../ui/HUD";
 import { SoundSystem } from "../systems/SoundSystem";
-import { Assets } from "pixi.js";
 
 export class LevelScene extends Scene {
   private level!: LevelConfig;
@@ -110,10 +109,16 @@ export class LevelScene extends Scene {
 
   private createEnemies(): void {
     this.level.enemies.forEach((config) => {
-      const enemy = new Enemy(config.x, config.y);
+      const enemy = new Enemy();
 
-      enemy.on("pointerdown", () => {
+      enemy.position.set(config.x, config.y);
+      enemy.scale.set(config.scale ?? 1);
+
+      enemy.hitArea = new PIXI.Circle(0, 0, 32);
+
+      enemy.once("pointerdown", () => {
         this.soundSystem.playSfx("enemyKill");
+
         enemy.kill();
         this.enemies = this.enemies.filter((e) => e !== enemy);
 
@@ -121,9 +126,12 @@ export class LevelScene extends Scene {
         this.hud.updateEnemies(this.killedEnemies, this.level.enemies.length);
       });
 
-      this.enemies.push(enemy);
       this.addChild(enemy);
+      this.enemies.push(enemy);
     });
+
+    // тимчасово, тільки для деву
+    (window as any).enemies = this.enemies;
   }
 
   private win(): void {
