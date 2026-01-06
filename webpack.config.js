@@ -2,43 +2,47 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-module.exports = {
-  mode: "production",
+module.exports = (env, argv) => {
+  const isProd = argv.mode === "production";
 
-  entry: "./src/index.ts",
+  return {
+    entry: "./src/index.ts",
 
-  output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "bundle.js",
-    publicPath:
-      process.env.NODE_ENV === "production" ? "/medieval-fighter/" : "/",
-    clean: true,
-  },
+    output: {
+      path: path.resolve(__dirname, "dist"),
+      filename: "bundle.js",
 
-  resolve: {
-    extensions: [".ts", ".js"],
-  },
+      // 🔑 ЄДИНЕ НАДІЙНЕ РІШЕННЯ
+      publicPath: isProd ? "/medieval-fighter/" : "/",
+      clean: true,
+    },
 
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
-      },
-    ],
-  },
+    resolve: {
+      extensions: [".ts", ".js"],
+    },
 
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: "./public/index.html",
-    }),
-
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: "public/assets", to: "assets" },
-        { from: "public/favicon.png", to: "" },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: "ts-loader",
+          exclude: /node_modules/,
+        },
       ],
-    }),
-  ],
+    },
+
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: "./public/index.html",
+      }),
+
+      new CopyWebpackPlugin({
+        patterns: [
+          { from: "public/assets", to: "assets" },
+          { from: "public/style.css", to: "" },
+          { from: "public/favicon.png", to: "" },
+        ],
+      }),
+    ],
+  };
 };
