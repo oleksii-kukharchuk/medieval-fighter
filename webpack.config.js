@@ -1,15 +1,18 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  mode: "development",
+  mode: "production",
+
   entry: "./src/index.ts",
 
   output: {
-    filename: "bundle.js",
     path: path.resolve(__dirname, "dist"),
-    publicPath: "/medieval-fighter/",
+    filename: "bundle.js",
+    publicPath:
+      process.env.NODE_ENV === "production" ? "/medieval-fighter/" : "/",
+    clean: true,
   },
 
   resolve: {
@@ -27,17 +30,15 @@ module.exports = {
   },
 
   plugins: [
-    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
     }),
+
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "public/assets", to: "assets" },
+        { from: "public/favicon.png", to: "" },
+      ],
+    }),
   ],
-
-  devServer: {
-    static: "./public",
-    port: 3000,
-    open: true,
-  },
-
-  devtool: "source-map",
 };
