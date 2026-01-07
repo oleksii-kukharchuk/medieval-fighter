@@ -51,15 +51,6 @@ export class LevelScene extends Scene {
       onBoosterUse: () => {
         this.useBooster();
       },
-      onMuteToggle: () => {
-        const muted = this.soundSystem.toggleMute();
-
-        if (!muted) {
-          this.soundSystem.playMusic("bg", true);
-        }
-
-        return muted;
-      },
     });
 
     this.addChild(this.hud);
@@ -129,9 +120,6 @@ export class LevelScene extends Scene {
       this.addChild(enemy);
       this.enemies.push(enemy);
     });
-
-    // тимчасово, тільки для деву
-    (window as any).enemies = this.enemies;
   }
 
   private win(): void {

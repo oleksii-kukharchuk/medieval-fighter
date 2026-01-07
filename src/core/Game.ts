@@ -14,11 +14,14 @@ export class Game {
   constructor() {
     this.app = new PIXI.Application();
   }
+
   async start(): Promise<void> {
     await this.app.init({
       width: 800,
       height: 600,
     });
+
+    this.app.stage.sortableChildren = true;
 
     this.app.renderer.background.alpha = 0;
 
@@ -28,13 +31,14 @@ export class Game {
 
     this.sceneManager = new SceneManager(this.app);
 
-    this.app.ticker.add(this.update);
-
     this.globalUI = new GlobalUI(this.soundSystem, () => {
       this.sceneManager.getCurrentScene()?.onUnmute?.();
     });
+    this.globalUI.zIndex = 1000;
 
     this.app.stage.addChild(this.globalUI);
+
+    this.app.ticker.add(this.update);
 
     this.sceneManager.change(
       new MainMenuScene(this.sceneManager, this.soundSystem)

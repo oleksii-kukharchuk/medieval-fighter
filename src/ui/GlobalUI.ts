@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { SoundSystem } from "../systems/SoundSystem";
+import { MuteButtonTextStyle } from "./TextStyles";
 
 export class GlobalUI extends PIXI.Container {
   private muteButton: PIXI.Text;
@@ -9,10 +10,10 @@ export class GlobalUI extends PIXI.Container {
 
     this.muteButton = new PIXI.Text({
       text: this.soundSystem.isMuted() ? "🔊" : "🔇",
-      style: { fontSize: 20 },
+      style: MuteButtonTextStyle,
     });
 
-    this.muteButton.position.set(760, 20);
+    this.muteButton.position.set(380, 20);
     this.muteButton.eventMode = "static";
     this.muteButton.cursor = "pointer";
 
