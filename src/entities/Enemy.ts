@@ -32,4 +32,12 @@ export class Enemy extends PIXI.AnimatedSprite {
     this.stop();
     this.destroy();
   }
+
+  pause(): void {
+    this.stop();
+  }
+
+  resume(): void {
+    this.play();
+  }
 }

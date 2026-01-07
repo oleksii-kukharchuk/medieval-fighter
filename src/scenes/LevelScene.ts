@@ -11,12 +11,18 @@ import { SoundSystem } from "../systems/SoundSystem";
 
 export class LevelScene extends Scene {
   private level!: LevelConfig;
+
   private enemies: Enemy[] = [];
   private timeLeft!: number;
-  private hud!: HUD;
-  private paused = false;
   private killedEnemies = 0;
   private boosterUsed = false;
+  private paused = false;
+
+  private hud!: HUD;
+
+  // 🔑 LAYERS
+  private gameLayer = new PIXI.Container();
+  private uiLayer = new PIXI.Container();
 
   constructor(
     private sceneManager: SceneManager,
@@ -37,26 +43,33 @@ export class LevelScene extends Scene {
     this.timeLeft = level.time;
   }
 
-  enter(): void {
+  // ------------------------------------------------
+  // SCENE LIFECYCLE
+  // ------------------------------------------------
+
+  public enter(): void {
     this.soundSystem.playMusic("bg", true);
 
+    // add layers
+    this.addChild(this.gameLayer);
+    this.addChild(this.uiLayer);
+
+    // background
     this.addBackground("bg_level");
 
+    // enemies
     this.createEnemies();
 
+    // HUD (NO MUTE HERE)
     this.hud = new HUD(this.level.enemies.length, {
-      onPauseToggle: (paused) => {
-        this.paused = paused;
-      },
-      onBoosterUse: () => {
-        this.useBooster();
-      },
+      onPauseToggle: (paused) => this.togglePause(paused),
+      onBoosterUse: () => this.useBooster(),
     });
 
-    this.addChild(this.hud);
+    this.uiLayer.addChild(this.hud);
   }
 
-  update(dt: number): void {
+  public update(dt: number): void {
     if (this.paused) return;
 
     this.timeLeft -= dt;
@@ -74,21 +87,40 @@ export class LevelScene extends Scene {
     }
   }
 
-  exit(): void {}
+  public exit(): void {
+    this.gameLayer.removeChildren();
+    this.uiLayer.removeChildren();
+  }
+
+  // ------------------------------------------------
+  // GLOBAL UI HOOK
+  // ------------------------------------------------
 
   onUnmute = () => {
     this.soundSystem.playMusic("bg", true);
   };
 
-  private calculateStars(timeSpent: number, maxTime: number): number {
-    const third = maxTime / 3;
+  // ------------------------------------------------
+  // PAUSE / BLUR
+  // ------------------------------------------------
 
-    if (timeSpent <= third) return 3;
-    if (timeSpent <= third * 2) return 2;
-    return 1;
+  private togglePause(paused: boolean): void {
+    this.paused = paused;
+
+    // pause / resume enemies
+    this.enemies.forEach((enemy) => (paused ? enemy.pause() : enemy.resume()));
+
+    // blur only game layer (keep UI layer clear)
+    if (paused) {
+      this.gameLayer.filters = [new PIXI.BlurFilter(6)];
+    } else {
+      this.gameLayer.filters = [];
+    }
   }
 
-  // ---------- helpers ----------
+  // ------------------------------------------------
+  // GAMEPLAY HELPERS
+  // ------------------------------------------------
 
   private useBooster(): void {
     if (this.boosterUsed) return;
@@ -104,23 +136,32 @@ export class LevelScene extends Scene {
 
       enemy.position.set(config.x, config.y);
       enemy.scale.set(config.scale ?? 1);
-
       enemy.hitArea = new PIXI.Circle(0, 0, 32);
 
-      enemy.once("pointerdown", () => {
+      const killEnemy = () => {
+        // Forbid killing enemies when paused (blur is active)
+        if (this.paused) return;
+
         this.soundSystem.playSfx("enemyKill");
 
+        enemy.off("pointerdown", killEnemy);
         enemy.kill();
         this.enemies = this.enemies.filter((e) => e !== enemy);
 
         this.killedEnemies++;
         this.hud.updateEnemies(this.killedEnemies, this.level.enemies.length);
-      });
+      };
 
-      this.addChild(enemy);
+      enemy.on("pointerdown", killEnemy);
+
       this.enemies.push(enemy);
+      this.gameLayer.addChild(enemy);
     });
   }
+
+  // ------------------------------------------------
+  // WIN / LOSE
+  // ------------------------------------------------
 
   private win(): void {
     const timeSpent = this.level.time - this.timeLeft;
@@ -138,8 +179,17 @@ export class LevelScene extends Scene {
 
   private lose(): void {
     this.soundSystem.playMusic("defeat");
+
     this.sceneManager.change(
       new DefeatScene(this.sceneManager, this.soundSystem, this.level.id)
     );
+  }
+
+  private calculateStars(timeSpent: number, maxTime: number): number {
+    const third = maxTime / 3;
+
+    if (timeSpent <= third) return 3;
+    if (timeSpent <= third * 2) return 2;
+    return 1;
   }
 }
