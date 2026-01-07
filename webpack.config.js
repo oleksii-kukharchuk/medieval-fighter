@@ -11,8 +11,6 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, "dist"),
       filename: "bundle.js",
-
-      // 🔑 ЄДИНЕ НАДІЙНЕ РІШЕННЯ
       publicPath: isProd ? "/medieval-fighter/" : "/",
       clean: true,
     },
@@ -29,6 +27,16 @@ module.exports = (env, argv) => {
           exclude: /node_modules/,
         },
       ],
+    },
+
+    devServer: {
+      port: 3000,
+      open: true,
+      hot: true,
+      static: {
+        directory: path.join(__dirname, "public"),
+      },
+      historyApiFallback: true,
     },
 
     plugins: [
