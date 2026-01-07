@@ -1,5 +1,3 @@
-# medieval-fighter
-
 # 🏰 Medieval Fighter v1.0
 
 A small browser game built with **TypeScript**, **PixiJS 8**, and **Webpack 5**.
